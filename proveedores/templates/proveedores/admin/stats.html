@@ -1,0 +1,80 @@
+{% extends 'layouts/base_admin.html' %}
+
+{% block title %}Estadísticas{% endblock %}
+{% block page_title %}Estadísticas del Sistema{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Resumen -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-bold">Distribución de Usuarios</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        Total Usuarios
+                        <span class="badge bg-primary rounded-pill">{{ total_users }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        Administradores
+                        <span class="badge bg-info rounded-pill">{{ users_admin }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        Proveedores
+                        <span class="badge bg-success rounded-pill">{{ users_proveedor }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentos por Estado -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-bold">Documentos por Estado</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for stat in docs_by_status %}
+                    <li class="list-group-item d-flex justify-content-between text-capitalize">
+                        {{ stat.estado  }} <span class="badge bg-secondary rounded-pill">{{ stat.total }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Documentos por Tipo -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">Documentos por Categoría</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Documento</th>
+                                <th class="text-end">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in docs_by_type %}
+                            <tr>
+                                <td>{{ stat.tipo_documento__nombre }}</td>
+                                <td class="text-end">{{ stat.total }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">No hay datos.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

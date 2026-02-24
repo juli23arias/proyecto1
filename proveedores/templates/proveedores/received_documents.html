@@ -1,0 +1,315 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="dash-wrapper">
+
+    <!-- ── Page Header ── -->
+    <div class="dash-header">
+        <div class="dash-header-left">
+            <div class="dash-icon bg-received">
+                <i class="bi bi-mailbox2"></i>
+            </div>
+            <div>
+                <h1 class="dash-title">Documentos Recibidos</h1>
+                <p class="dash-subtitle">Archivos y respuestas enviadas por la administración</p>
+            </div>
+        </div>
+        <div class="badge-received-count">
+            <i class="bi bi-info-circle-fill me-1"></i> {{ documentos|length }} Documento(s) en total
+        </div>
+    </div>
+
+    <!-- ── Explanation Card ── -->
+    <div class="alert-premium-info">
+        <div class="d-flex gap-3">
+            <i class="bi bi-shield-check fs-4"></i>
+            <div>
+                <h6 class="m-0 fw-bold">Buzón de Mensajería Oficial</h6>
+                <p class="m-0 small text-slate-600">En esta sección encontrarás contratos, circulares, respuestas a
+                    solicitudes y otros documentos que YSG ha compartido contigo.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Received Documents Table ── -->
+    <div class="docs-card">
+        <div class="docs-card-header">
+            <div class="docs-title-wrap">
+                <i class="bi bi-inbox-fill text-received"></i>
+                <span>Documentación de Administración</span>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="docs-table">
+                <thead>
+                    <tr>
+                        <th>Tipo de Documento</th>
+                        <th>Asunto / Descripción</th>
+                        <th>Fecha de Recepción</th>
+                        <th>Vencimiento</th>
+                        <th>Estado</th>
+                        <th class="text-center">Archivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documentos %}
+                    <tr>
+                        <td>
+                            <span class="doc-name text-received-bold">{{ doc.tipo_documento.nombre }}</span>
+                        </td>
+                        <td class="desc-cell">
+                            {% if doc.descripcion %}
+                            <span class="text-slate-600 small">{{ doc.descripcion }}</span>
+                            {% else %}
+                            <span class="text-muted italic small">Sin descripción adicional</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-slate-500 small">
+                            {{ doc.fecha_carga|date:"d/m/Y"  }} <div class="text-muted" style="font-size: 0.75rem;">{{ doc.fecha_carga|date:"H:i" }}</div>
+                        </td>
+                        <td>
+                            {% if doc.fecha_vencimiento %}
+                            <span
+                                class="badge-status {% if doc.esta_vencido %}badge-danger{% else %}badge-success{% endif %}">
+                                {{ doc.fecha_vencimiento|date:"d/m/Y"  }} </span>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge-status badge-info">
+                                <i class="bi bi-file-earmark-check"></i> Oficial
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="action-group-premium" style="justify-content: center;">
+                                <button type="button" onclick="openPdfViewer('{% url 'serve_document_pdf' doc.pk %}')"
+                                    class="btn-action view" title="Visualizar">
+                                    <i class="bi bi-eye-fill"></i> <span class="ms-1">Ver</span>
+                                </button>
+                                <a href="{{ doc.archivo.url }}" download class="btn-action view" title="Descargar PDF">
+                                    <i class="bi bi-download"></i> <span class="ms-1">Descargar</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            <div class="empty-state-illust">
+                                <i class="bi bi-envelope-open text-muted opacity-20"></i>
+                                <p class="mt-2">Aún no has recibido documentos de la administración.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Palette ── */
+    :root {
+        --received-primary: #0891b2;
+        /* Cyan 600 */
+        --received-bg: #ecfeff;
+        --received-border: #cffafe;
+    }
+
+    .bg-received {
+        background: linear-gradient(135deg, var(--received-primary), #0e7490) !important;
+        box-shadow: 0 4px 14px rgba(8, 145, 178, 0.35) !important;
+    }
+
+    .text-received {
+        color: var(--received-primary) !important;
+    }
+
+    .text-received-bold {
+        color: #164e63;
+        font-weight: 700;
+    }
+
+    .bg-info-soft {
+        background-color: var(--received-bg);
+    }
+
+    .dash-wrapper {
+        padding: 28px 0 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .dash-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dash-header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .dash-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #fff;
+    }
+
+    .dash-title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .dash-subtitle {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .badge-received-count {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .alert-premium-info {
+        background: #f0f9ff;
+        border: 1px solid #e0f2fe;
+        color: #0369a1;
+        padding: 16px 20px;
+        border-radius: 14px;
+    }
+
+    .text-slate-600 {
+        color: #475569;
+    }
+
+    .docs-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .docs-card-header {
+        padding: 14px 22px;
+        background: #fff;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .docs-title-wrap {
+        font-size: 0.875rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #1e293b;
+    }
+
+    .docs-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .docs-table th {
+        padding: 12px 20px;
+        background: #f8fafc;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .docs-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .desc-cell {
+        max-width: 300px;
+    }
+
+    .badge-status {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .badge-success {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .badge-info {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .action-group-premium {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn-action {
+        padding: 6px 14px;
+        min-width: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+        border: 1px solid #dbeafe;
+        background: #eff6ff;
+        color: #2563eb;
+        text-decoration: none !important;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .btn-action:hover {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .empty-row {
+        text-align: center;
+        padding: 60px 20px !important;
+        color: #94a3b8;
+    }
+
+    .empty-state-illust i {
+        font-size: 3rem;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}

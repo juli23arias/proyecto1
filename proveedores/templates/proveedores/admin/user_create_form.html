@@ -1,0 +1,259 @@
+{% extends 'layouts/base_admin.html' %}
+
+{% block title %}Crear Usuario{% endblock %}
+{% block page_title %}Nuevo Usuario{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-5 col-lg-6">
+        <div class="premium-card">
+            <div class="card-p-header">
+                <h6 class="m-0"><i class="bi bi-person-plus-fill me-2 text-primary"></i> Registrar Nuevo Usuario</h6>
+            </div>
+            <div class="card-p-body">
+                
+                {% if errors %}
+                <div class="alert-premium-error mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+                        <span class="fw-bold">Errores en el formulario:</span>
+                    </div>
+                    <ul class="mb-0 small ps-4">
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" class="compact-form">
+                    {% csrf_token %}
+
+                    <div class="form-section mb-4">
+                        <label class="form-label-premium">Nombre de Usuario <span class="text-danger">*</span></label>
+                        <div class="input-icon-group">
+                            <i class="bi bi-at"></i>
+                            <input type="text" name="username" class="premium-input" placeholder="Ej: k.santamaria" value="{{ form_data.username|default:'' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section mb-4">
+                        <label class="form-label-premium">Email de Contacto</label>
+                        <div class="input-icon-group">
+                            <i class="bi bi-envelope"></i>
+                            <input type="email" name="email" class="premium-input" placeholder="usuario@ejemplo.com" value="{{ form_data.email|default:'' }}">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label-premium">Contraseña <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="premium-input" placeholder="••••••••" required minlength="6">
+                            <div class="form-text-compact">Mínimo 6 caracteres</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-premium">Rol del Usuario <span class="text-danger">*</span></label>
+                            <select name="rol" class="premium-select" id="rolSelect" onchange="toggleProveedorFields()">
+                                <option value="proveedor" {% if form_data.rol == "proveedor" or not form_data.rol %}selected{% endif %}>Proveedor</option>
+                                <option value="admin" {% if form_data.rol == "admin" %}selected{% endif %}>Administrador</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="proveedorFields" class="special-section p-3 rounded-4 mb-4">
+                        <div class="d-flex align-items-center mb-3 text-slate-500">
+                            <i class="bi bi-building me-2"></i>
+                            <span class="fw-bold small text-uppercase letter-spacing-1">Información del Proveedor</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label-premium">Nombre de Empresa / Razón Social</label>
+                            <input type="text" name="nombre_empresa" class="premium-input bg-white" value="{{ form_data.nombre_empresa|default:'' }}" placeholder="Ej: Soluciones Tech S.A.S">
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-premium">NIT</label>
+                                <input type="text" name="nit" class="premium-input bg-white" value="{{ form_data.nit|default:'' }}" placeholder="900.000.000-1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-premium">Teléfono</label>
+                                <input type="text" name="telefono" class="premium-input bg-white" value="{{ form_data.telefono|default:'' }}" placeholder="300 000 0000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-footer mt-4 pt-3 d-flex gap-2">
+                        <a href="{% url 'admin_user_list' %}" class="btn-cancel-premium flex-grow-1">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn-premium-success px-4 py-2">
+                            <i class="bi bi-person-plus-fill me-2"></i> Crear Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Premium Card ── */
+    .premium-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .card-p-header {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #fff;
+    }
+
+    .card-p-header h6 {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    .card-p-body {
+        padding: 20px 24px;
+    }
+
+    /* ── Form Components ── */
+    .form-label-premium {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+
+    .premium-input, .premium-select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: #f8fafc;
+        color: #33411b;
+        transition: all 0.2s;
+    }
+
+    .premium-input:focus, .premium-select:focus {
+        background: #fff;
+        border-color: #2563eb;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .input-icon-group {
+        position: relative;
+    }
+
+    .input-icon-group i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1rem;
+    }
+
+    .input-icon-group .premium-input {
+        padding-left: 36px;
+    }
+
+    .form-text-compact {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+
+    /* ── Special Sections ── */
+    .special-section {
+        background: #f1f5f9;
+        border: 1px dashed #cbd5e1;
+    }
+
+    .letter-spacing-1 {
+        letter-spacing: 1px;
+    }
+
+    .text-slate-500 {
+        color: #64748b;
+    }
+
+    /* ── Error Styling ── */
+    .alert-premium-error {
+        background: #fef2f2;
+        border: 1px solid #fee2e2;
+        color: #b91c1c;
+        padding: 12px 16px;
+        border-radius: 12px;
+    }
+
+    /* ── Buttons ── */
+    .btn-premium-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-premium-success:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        color: #fff;
+    }
+
+    .btn-cancel-premium {
+        background: #fff;
+        border: 1.5px solid #e2e8f0;
+        color: #64748b;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel-premium:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    .rounded-4 {
+        border-radius: 12px !important;
+    }
+</style>
+
+<script>
+function toggleProveedorFields() {
+    var rol = document.getElementById('rolSelect').value;
+    var fields = document.getElementById('proveedorFields');
+    if (fields) {
+        fields.style.display = (rol === 'proveedor') ? 'block' : 'none';
+    }
+}
+// Run on load
+document.addEventListener('DOMContentLoaded', toggleProveedorFields);
+</script>
+{% endblock %}

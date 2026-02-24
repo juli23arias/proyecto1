@@ -1,0 +1,402 @@
+﻿{% extends 'layouts/base_admin.html' %}
+{% block title %}Documentos{% endblock %}
+{% block page_title %}Gestión de Documentación{% endblock %}
+{% block content %}
+<!-- -- Filter Panel -- -->
+<div class="premium-card mb-4">
+    <div class="card-p-header">
+        <h6 class="m-0"><i class="bi bi-funnel-fill me-2 text-primary"></i> Filtrar Documentos</h6>
+    </div>
+    <div class="card-p-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label-premium">Búsqueda rápida</label>
+                <div class="input-group-premium">
+                    <i class="bi bi-search"></i>
+                    <input type="text" name="q" placeholder="Proveedor, NIT o Tipo..." value="{{ q_actual }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label-premium">Estado Admin</label>
+                <select name="estado" class="premium-select">
+                    <option value="">Todos los Estados</option>
+                    <option value="pendiente" {% if estado_actual == "pendiente" %}selected{% endif %}>Pendiente</option>
+                    <option value="aprobado" {% if estado_actual == "aprobado" %}selected{% endif %}>Aprobado</option>
+                    <option value="rechazado" {% if estado_actual == "rechazado" %}selected{% endif %}>Rechazado</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label-premium">Categoría</label>
+                <select name="tipo" class="premium-select">
+                    <option value="">Todas las Categorías</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id }}" {% if tipo_actual == categoria.id %}selected{% endif %}>{{ categoria.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn-premium-blue w-100 py-2">
+                    Aplicar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- -- Documents List -- -->
+<div class="premium-card">
+    <div class="card-p-body p-0">
+        <div class="table-responsive">
+            <table class="table premium-table align-middle m-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Proveedor / NIT</th>
+                        <th>Documento</th>
+                        <th>Estado Revisión</th>
+                        <th>Vigencia / Fecha</th>
+                        <th>Cargado el</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documentos %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="provider-info">
+                                <span class="provider-name">{{ doc.proveedor.nombre }}</span>
+                                <span class="provider-nit">{{ doc.proveedor.nit }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="doc-type-info">
+                                <span class="doc-badge">{{ doc.tipo_documento.nombre }}</span>
+                                {% if doc.descripcion %}
+                                <div class="doc-desc" title="{{ doc.descripcion }}">{{ doc.descripcion|truncatechars:35
+                                    }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if doc.estado == "aprobado" %}
+                            <span class="status-chip approved">
+                                <i class="bi bi-check-circle-fill"></i> Aprobado
+                            </span>
+                            {% elif doc.estado == "rechazado" %}
+                            <span class="status-chip rejected">
+                                <i class="bi bi-x-circle-fill"></i> Rechazado
+                            </span>
+                            {% else %}
+                            <span class="status-chip pending">
+                                <i class="bi bi-clock-fill"></i> Pendiente
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if doc.esta_vencido %}
+                            <span class="validity-chip expired">
+                                <i class="bi bi-exclamation-triangle-fill"></i> VENCIDO
+                            </span>
+                            {% elif doc.fecha_vencimiento %}
+                            <span class="validity-chip valid">
+                                <i class="bi bi-shield-check"></i> VIGENTE
+                            </span>
+                            <div class="validity-date">{{ doc.fecha_vencimiento|date:"d/m/Y" }}</div>
+                            {% else %}
+                            <span class="validity-chip perm">Perpetuo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="text-slate-600 small">
+                                <i class="bi bi-calendar3 me-1"></i> {{ doc.fecha_carga|date:"d/m/Y" }} <span
+                                    class="text-muted ms-1">{{ doc.fecha_carga|date:"H:i" }}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="acciones-botones">
+                                <button type="button" onclick="openPdfViewer('{% url 'serve_document_pdf' doc.pk %}')"
+                                    class="btn-action view" title="Visualizar">
+                                    <i class="bi bi-eye-fill"></i> <span class="ms-1">Ver</span>
+                                </button>
+                                <a href="{{ doc.archivo.url }}" download class="btn-action view" title="Descargar PDF">
+                                    <i class="bi bi-download"></i> <span class="ms-1">Descargar</span>
+                                </a>
+                                <a href="{% url 'admin_document_review' doc.pk %}" class="btn-review-premium"
+                                    title="Evaluar">
+                                    Revisar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="empty-table-state">
+                                <i class="bi bi-file-earmark-x text-muted opacity-25" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">No se encontraron documentos con los filtros aplicados.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<style>
+    /* -- Filter Styling -- */
+    .form-label-premium {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 4px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .input-group-premium {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-group-premium i {
+        position: absolute;
+        left: 10px;
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+
+    .input-group-premium input {
+        width: 100%;
+        padding: 6px 10px 6px 32px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        background: #f8fafc;
+        transition: all 0.2s;
+    }
+
+    .input-group-premium input:focus {
+        background: #fff;
+        border-color: #2563eb;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .premium-select {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        background: #f8fafc;
+        color: #33411b;
+        cursor: pointer;
+    }
+
+    .premium-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .card-p-header {
+        padding: 10px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-p-header h6 {
+        font-size: 0.95rem;
+    }
+
+    .card-p-body {
+        padding: 12px 16px;
+    }
+
+    .premium-card .card-p-body.p-0 {
+        padding: 0;
+    }
+
+    .premium-table thead th {
+        background: #f8fafc;
+        padding: 8px 16px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .premium-table tbody td {
+        padding: 10px 16px;
+    }
+
+    .provider-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .provider-name {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.85rem;
+    }
+
+    .provider-nit {
+        color: #64748b;
+        font-size: 0.7rem;
+    }
+
+    .doc-type-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    .doc-badge {
+        font-weight: 600;
+        color: #1e40af;
+        font-size: 0.8rem;
+    }
+
+    .doc-desc {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-style: italic;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-chip.approved {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status-chip.rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-chip.pending {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .validity-chip {
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.6rem;
+        font-weight: 800;
+        display: inline-block;
+    }
+
+    .validity-chip.expired {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .validity-chip.valid {
+        background: #16a34a;
+        color: #fff;
+    }
+
+    .validity-chip.perm {
+        background: #64748b;
+        color: #fff;
+    }
+
+    .validity-date {
+        font-size: 0.65rem;
+        color: #64748b;
+        margin-top: 1px;
+        font-weight: 600;
+    }
+
+    .btn-action {
+        padding: 5px 12px;
+        min-width: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        background: #f1f5f9;
+        color: #64748b;
+        text-decoration: none !important;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .btn-action.view {
+        background: #eff6ff;
+        color: #2563eb;
+        border-color: #dbeafe;
+    }
+
+    .btn-action.view:hover {
+        background: #2563eb;
+        color: #fff;
+        border-color: #1e40af;
+    }
+
+    .btn-review-premium {
+        background: #2563eb;
+        border: 1px solid #1e40af;
+        color: #fff !important;
+        padding: 5px 14px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-decoration: none !important;
+        transition: all 0.2s;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-review-premium:hover {
+        background: #1e40af;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-premium-blue {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .btn-premium-blue:hover {
+        transform: translateY(-1px);
+        color: #fff;
+    }
+
+    /* -- Layout Refinements -- */
+    .acciones-botones {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+{% endblock %}

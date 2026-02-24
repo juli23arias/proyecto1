@@ -1,0 +1,154 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="fw-bold">Bienvenido, {{ user.username }} 👋</h2>
+        <p class="text-muted">Resumen analítico de la gestión de proveedores y documentos.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-people-fill text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-title mb-0 text-muted small text-uppercase">Proveedores</h6>
+                        <h2 class="fw-bold mb-0">{{ total_proveedores }}</h2>
+                    </div>
+                </div>
+                <p class="text-success small mb-0"><i class="bi bi-arrow-up"></i> {{ nuevos_proveedores }} registrados
+                    este mes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                        <i class="bi bi-file-earmark-pdf text-success fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-title mb-0 text-muted small text-uppercase">Documentos</h6>
+                        <h2 class="fw-bold mb-0">{{ total_documentos }}</h2>
+                    </div>
+                </div>
+                <p class="text-muted small mb-0">Archivos totales en el servidor</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-primary border-0 border-start border-4 h-100 bg-white">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <p class="fw-bold mb-2 text-primary small text-uppercase">Gestión rápida</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'proveedor_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i>
+                        Nuevo Proveedor</a>
+                    <a href="{% url 'proveedor_list' %}" class="btn btn-outline-secondary btn-sm"><i
+                            class="bi bi-list-ul"></i> Listado completo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Tendencia de Registros
+                    2026</h5>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height:300px;">
+                    <canvas id="supplierChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold">Recientes</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light small">
+                        <tr>
+                            <th class="border-0 px-3">Nombre</th>
+                            <th class="border-0 text-end px-3">Ficha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in ultimos_proveedores %}
+                        <tr>
+                            <td class="px-3">
+                                <span class="fw-bold text-dark d-block">{{ p.nombre }}</span>
+                                <small class="text-muted">{{ p.fecha_registro|date:"d M" }}</small>
+                            </td>
+                            <td class="text-end px-3">
+                                <a href="{% url 'proveedor_detail' p.pk %}"
+                                    class="btn btn-sm btn-light border text-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center py-4 text-muted">Sin datos recientes</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ grafica_labels|json_script:"labels-data"  }} {{ grafica_data|json_script:"values-data"  }} <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const labels = JSON.parse(document.getElementById('labels-data').textContent);
+        const dataValues = JSON.parse(document.getElementById('values-data').textContent);
+
+        const ctx = document.getElementById('supplierChart').getContext('2d');
+
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(13, 110, 253, 0.3)');
+        gradient.addColorStop(1, 'rgba(13, 110, 253, 0.01)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Proveedores Registrados',
+                    data: dataValues,
+                    borderColor: '#0d6efd',
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#0d6efd',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

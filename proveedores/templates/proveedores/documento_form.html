@@ -1,0 +1,152 @@
+{% extends 'layouts/base_admin.html' %}
+
+{% block title %}Cargar Documento{% endblock %}
+{% block page_title %}Nueva Documentación{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-6 col-lg-7">
+        <div class="premium-card">
+            <div class="card-p-header">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary-subtle text-primary p-2 rounded-3 me-3">
+                        <i class="bi bi-file-earmark-arrow-up-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="m-0 text-slate-800">Cargar Nuevo Documento</h6>
+                        <small class="text-slate-500 fw-bold">
+                            {% if proveedor %}{{ proveedor.nombre }}{% else %}Gestión Global{% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-p-body">
+
+                {% if form.errors %}
+                <div class="alert-premium-error mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+                        <span class="fw-bold">Errores en el formulario:</span>
+                    </div>
+                    <ul class="mb-0 small ps-4 text-danger">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="compact-form">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        {% if not proveedor %}
+                        <div class="col-12 mb-3">
+                            <label class="form-label-premium">Proveedor <span class="text-danger">*</span></label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-building-fill"></i>
+                                {{ form.proveedor  }} </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-premium">Tipo de Documento <span class="text-danger">*</span></label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-tag-fill"></i>
+                                <select name="tipo_documento" class="premium-select" required>
+                                    <option value="">Seleccione...</option>
+                                    {% for choice in form.fields.tipo_documento.queryset %}
+                                        <option value="{{ choice.id }}" {% if form.tipo_documento.value|add:"0" == choice.id %}selected{% endif %}>{{ choice.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-premium">Fecha de Vencimiento</label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-calendar-event-fill"></i>
+                                <input type="date" name="fecha_vencimiento" class="premium-input bg-white" value="{{ form.fecha_vencimiento.value|default:'' }}">
+                            </div>
+                            <div class="form-text-compact">Obligatorio según el tipo de documento.</div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label-premium">Archivo PDF <span class="text-danger">*</span></label>
+                            <div class="upload-zone p-3 rounded-4 bg-light border-dashed">
+                                <input type="file" name="archivo" class="form-control premium-file-input" accept=".pdf" required>
+                                <div class="text-center mt-2">
+                                    <i class="bi bi-filetype-pdf text-danger fs-3"></i>
+                                    <div class="form-text-compact">Solo se aceptan archivos PDF de hasta 5MB</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label-premium">Descripción Opcional</label>
+                            <textarea name="descripcion" class="premium-input bg-white" rows="2" placeholder="Notas internas sobre el documento...">{{ form.descripcion.value|default:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="special-section p-3 rounded-4 mb-4 mt-2">
+                        <div class="form-check form-switch d-flex align-items-center gap-3 ps-0">
+                            <div class="switch-container">
+                                <input class="form-check-input ms-0 mt-0" type="checkbox" name="enviado_a_proveedor" id="id_enviado_a_proveedor" style="width: 40px; height: 22px;" {% if form.enviado_a_proveedor.value %}checked{% endif %}>
+                            </div>
+                            <div>
+                                <label class="form-label-premium mb-0 cursor-pointer" for="id_enviado_a_proveedor">
+                                    Enviar al Proveedor
+                                </label>
+                                <div class="form-text-compact mt-0">Si se activa, el documento será visible en el panel del proveedor.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-footer mt-4 pt-3 d-flex gap-2">
+                        {% if proveedor %}
+                            <a href="{% url 'proveedor_detail' proveedor.pk %}" class="btn-cancel-premium flex-grow-1">Cancelar</a>
+                        {% else %}
+                            <a href="{% url 'admin_document_list' %}" class="btn-cancel-premium flex-grow-1">Cancelar</a>
+                        {% endif %}
+                        <button type="submit" class="btn-premium-success px-5 py-2">
+                            <i class="bi bi-cloud-arrow-up-fill me-2"></i> Subir Documento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .premium-card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; }
+    .card-p-header { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; background: #fff; }
+    .card-p-body { padding: 24px; }
+    .bg-primary-subtle { background-color: #e0e7ff; }
+    .text-slate-800 { color: #1e293b; font-weight: 700; }
+    .text-slate-500 { color: #64748b; font-size: 0.8rem; }
+    .form-label-premium { display: block; font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .premium-input, .premium-select, .form-control.premium-file-input { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.92rem; background: #f8fafc; color: #1e293b; transition: all 0.2s; }
+    .premium-input:focus, .premium-select:focus { background: #fff; border-color: #2563eb; outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    .input-icon-group { position: relative; }
+    .input-icon-group i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+    .input-icon-group select, .input-icon-group input { padding-left: 38px !important; }
+    .form-text-compact { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+    .border-dashed { border: 2px dashed #cbd5e1; }
+    .upload-zone:hover { border-color: #94a3b8; background: #f1f5f9; cursor: pointer; }
+    .premium-file-input { opacity: 0.7; }
+    .special-section { background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); }
+    .switch-container { display: flex; align-items: center; }
+    .form-check-input { cursor: pointer; }
+    .form-check-input:checked { background-color: #2563eb; border-color: #2563eb; }
+    .cursor-pointer { cursor: pointer; }
+    .btn-premium-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 10px; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transition: all 0.2s; }
+    .btn-premium-success:hover { transform: translateY(-1.5px); box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3); color: #fff; }
+    .btn-cancel-premium { background: #fff; border: 1.5px solid #e2e8f0; color: #64748b; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none !important; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-cancel-premium:hover { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
+    .alert-premium-error { background: #fef2f2; border: 1.5px solid #fee2e2; border-radius: 12px; padding: 14px 20px; }
+    .rounded-4 { border-radius: 14px !important; }
+</style>
+{% endblock %}

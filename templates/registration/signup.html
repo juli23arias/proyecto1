@@ -1,0 +1,637 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block content %}
+<div class="reg-wrapper">
+
+    <!-- ── Brand Panel ── -->
+    <div class="reg-brand">
+        <div class="brand-content">
+            <div class="brand-logo">
+                <i class="bi bi-shield-fill-check"></i>
+            </div>
+            <h1 class="brand-title">YSG</h1>
+            <p class="brand-subtitle">Sistema de Gestión Documental</p>
+
+            <div class="brand-steps">
+                <p class="steps-title">Cómo registrarse</p>
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <span>Complete sus datos de acceso</span>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <span>Ingrese información de su empresa</span>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <span>Acceda y gestione sus documentos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Form Panel ── -->
+    <div class="reg-form-panel">
+        <div class="reg-form-inner">
+
+            <div class="reg-header">
+                <h2 class="reg-title">Crear Cuenta</h2>
+                <p class="reg-subtitle">Regístrese como proveedor en el sistema YSG</p>
+            </div>
+
+            <form method="post" novalidate class="reg-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert-error">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="fields-list">
+                    {% for field in form %}
+                    <div class="form-group" id="group-{{ field.name }}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+
+                        {% if field.name == 'password' %}
+                        <div id="password-requirements" class="requirements-box">
+                            <p class="requirements-title">La contraseña debe contener:</p>
+                            <ul class="requirements-list">
+                                <li id="req-length" class="requirement-item invalid"><i class="bi bi-x-circle-fill"></i>
+                                    mínimo 8 caracteres</li>
+                                <li id="req-upper" class="requirement-item invalid"><i class="bi bi-x-circle-fill"></i>
+                                    una letra mayúscula</li>
+                                <li id="req-number" class="requirement-item invalid"><i class="bi bi-x-circle-fill"></i>
+                                    un número</li>
+                                <li id="req-special" class="requirement-item invalid"><i
+                                        class="bi bi-x-circle-fill"></i> un carácter especial</li>
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div id="error-{{ field.name }}" class="live-error" style="display: none;"></div>
+
+                        {% if field.help_text %}
+                        <div class="field-help">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        {% for error in field.errors %}
+                        <div class="field-error">
+                            <i class="bi bi-exclamation-circle"></i> {{ error }}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn-register">
+                    <span>Registrarse como Proveedor</span>
+                    <i class="bi bi-arrow-right-circle-fill"></i>
+                </button>
+            </form>
+
+            <div class="reg-footer">
+                <p>¿Ya tiene una cuenta? <a href="{% url 'login' %}">Inicie Sesión</a></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Reset base container ── */
+    body {
+        background: #0f172a !important;
+    }
+
+    .container.content-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        align-items: stretch !important;
+    }
+
+    .w-100 {
+        display: flex;
+        min-height: 100vh;
+        padding: 0 !important;
+    }
+
+    /* ── Wrapper ── */
+    .reg-wrapper {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── Brand Panel ── */
+    .reg-brand {
+        width: 380px;
+        flex-shrink: 0;
+        background: linear-gradient(145deg, #0f172a 0%, #1e3a5f 50%, #1a56db 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .reg-brand::before {
+        content: '';
+        position: absolute;
+        width: 350px;
+        height: 350px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.04);
+        top: -100px;
+        right: -100px;
+    }
+
+    .reg-brand::after {
+        content: '';
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.03);
+        bottom: -70px;
+        left: -70px;
+    }
+
+    .brand-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        color: #fff;
+        width: 100%;
+    }
+
+    .brand-logo {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2.2rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .brand-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: 4px;
+        margin-bottom: 6px;
+    }
+
+    .brand-subtitle {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 40px;
+    }
+
+    .steps-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+        margin-bottom: 16px;
+        text-align: left;
+    }
+
+    .brand-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: left;
+    }
+
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .step-num {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+        color: #93c5fd;
+    }
+
+    /* ── Form Panel ── */
+    .reg-form-panel {
+        flex: 1;
+        background: #fff;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 18px 36px;
+        overflow-y: auto;
+    }
+
+    .reg-form-inner {
+        width: 100%;
+        max-width: 560px;
+    }
+
+    .reg-header {
+        margin-bottom: 10px;
+    }
+
+    .reg-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .reg-subtitle {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    /* ── Fields ── */
+    .fields-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .form-group label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    /* Style all Django-rendered inputs */
+    .reg-form input[type="text"],
+    .reg-form input[type="email"],
+    .reg-form input[type="password"],
+    .reg-form input[type="number"],
+    .reg-form select,
+    .reg-form textarea {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 7px;
+        font-size: 0.83rem;
+        color: #1e293b;
+        background: #f8fafc;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        outline: none;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .reg-form input:focus,
+    .reg-form select:focus,
+    .reg-form textarea:focus {
+        border-color: #1a56db;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.11);
+    }
+
+    .field-help {
+        font-size: 0.78rem;
+        color: #94a3b8;
+    }
+
+    .field-error {
+        font-size: 0.8rem;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ── Real-time Validation UI ── */
+    .requirements-box {
+        margin-top: 8px;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+
+    .requirements-title {
+        font-size: 0.725rem;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .requirements-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 12px;
+    }
+
+    .requirement-item {
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s;
+    }
+
+    .requirement-item.invalid {
+        color: #ef4444;
+    }
+
+    .requirement-item.valid {
+        color: #22c55e;
+    }
+
+    .live-error {
+        font-size: 0.75rem;
+        color: #dc2626;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .input-error {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    .input-success {
+        border-color: #22c55e !important;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+    }
+
+    /* ── Non-field error ── */
+    .alert-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-left: 4px solid #ef4444;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 22px;
+        color: #b91c1c;
+        font-size: 0.875rem;
+    }
+
+    .alert-error i {
+        margin-top: 1px;
+        flex-shrink: 0;
+    }
+
+    /* ── Submit Button ── */
+    .btn-register {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(135deg, #1a56db, #1e40af);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+        box-shadow: 0 4px 14px rgba(26, 86, 219, 0.35);
+        letter-spacing: 0.3px;
+        font-family: inherit;
+    }
+
+    .btn-register:hover {
+        background: linear-gradient(135deg, #1e40af, #1e3a8a);
+        box-shadow: 0 6px 20px rgba(26, 86, 219, 0.45);
+        transform: translateY(-1px);
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3);
+    }
+
+    /* ── Footer ── */
+    .reg-footer {
+        margin-top: 6px;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .reg-footer a {
+        color: #1a56db;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .reg-footer a:hover {
+        color: #1e40af;
+        text-decoration: underline;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+        .reg-brand {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .reg-form-panel {
+            padding: 30px 20px;
+        }
+
+        .requirements-list {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.reg-form');
+        const password = document.getElementById('id_password');
+        const confirm = document.getElementById('id_password_confirm');
+        const email = document.getElementById('id_email');
+
+        // Requirements elements
+        const reqLength = document.getElementById('req-length');
+        const reqUpper = document.getElementById('req-upper');
+        const reqNumber = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
+
+        function updateRequirement(el, valid) {
+            if (!el) return;
+            const icon = el.querySelector('i');
+            if (valid) {
+                el.classList.remove('invalid');
+                el.classList.add('valid');
+                if (icon) icon.className = 'bi bi-check-circle-fill';
+            } else {
+                el.classList.remove('valid');
+                el.classList.add('invalid');
+                if (icon) icon.className = 'bi bi-x-circle-fill';
+            }
+        }
+
+        function validatePassword(val) {
+            const hasLength = val.length >= 8;
+            const hasUpper = /[A-Z]/.test(val);
+            const hasNumber = /[0-9]/.test(val);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+
+            updateRequirement(reqLength, hasLength);
+            updateRequirement(reqUpper, hasUpper);
+            updateRequirement(reqNumber, hasNumber);
+            updateRequirement(reqSpecial, hasSpecial);
+
+            return hasLength && hasUpper && hasNumber && hasSpecial;
+        }
+
+        function showError(field, message) {
+            const input = document.getElementById('id_' + field);
+            const errorDiv = document.getElementById('error-' + field);
+            if (input && errorDiv) {
+                input.classList.add('input-error');
+                input.classList.remove('input-success');
+                errorDiv.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + message;
+                errorDiv.style.display = 'flex';
+            }
+        }
+
+        function hideError(field) {
+            const input = document.getElementById('id_' + field);
+            const errorDiv = document.getElementById('error-' + field);
+            if (input && errorDiv) {
+                input.classList.remove('input-error');
+                input.classList.add('input-success');
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        if (password) {
+            password.addEventListener('input', function () {
+                const isValid = validatePassword(this.value);
+                if (this.value) {
+                    if (isValid) {
+                        hideError('password');
+                    } else {
+                        showError('password', 'La contraseña no cumple los requisitos.');
+                    }
+                } else {
+                    showError('password', 'Este campo es obligatorio.');
+                }
+            });
+        }
+
+        if (confirm) {
+            confirm.addEventListener('input', function () {
+                if (this.value === password.value) {
+                    hideError('password_confirm');
+                } else {
+                    showError('password_confirm', 'Las contraseñas no coinciden.');
+                }
+            });
+        }
+
+        if (email) {
+            email.addEventListener('input', function () {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (re.test(this.value)) {
+                    hideError('email');
+                } else {
+                    showError('email', 'Email no válido.');
+                }
+            });
+        }
+
+        // Other fields validation
+        ['nit', 'nombre', 'telefono', 'username'].forEach(field => {
+            const input = document.getElementById('id_' + field);
+            if (input) {
+                input.addEventListener('input', function () {
+                    if (this.value.trim()) {
+                        hideError(field);
+                    } else {
+                        showError(field, 'Este campo es obligatorio.');
+                    }
+                });
+            }
+        });
+
+        form.addEventListener('submit', function (e) {
+            let hasError = false;
+
+            if (password && !validatePassword(password.value)) {
+                showError('password', 'La contraseña no cumple los requisitos.');
+                hasError = true;
+            }
+            if (confirm && password && password.value !== confirm.value) {
+                showError('password_confirm', 'Las contraseñas no coinciden.');
+                hasError = true;
+            }
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email && !re.test(email.value)) {
+                showError('email', 'Email no válido.');
+                hasError = true;
+            }
+
+            ['nit', 'nombre', 'telefono', 'username'].forEach(field => {
+                const input = document.getElementById('id_' + field);
+                if (input && !input.value.trim()) {
+                    showError(field, 'Este campo es obligatorio.');
+                    hasError = true;
+                }
+            });
+
+            if (hasError) {
+                e.preventDefault();
+                const firstError = document.querySelector('.input-error');
+                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    });
+</script>
+{% endblock %}

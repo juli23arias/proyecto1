@@ -1,0 +1,81 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'proveedor_list' %}">Proveedores</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ proveedor.nombre }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-header bg-secondary text-white fw-bold">
+                <i class="bi bi-person-lines-fill"></i> Datos del Proveedor
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>NIT:</strong> {{ proveedor.nit }}</li>
+                <li class="list-group-item"><strong>Nombre:</strong> {{ proveedor.nombre }}</li>
+                <li class="list-group-item"><strong>Email:</strong> <a href="mailto:{{ proveedor.email }}">{{ proveedor.email }}</a></li>
+                <li class="list-group-item"><strong>Teléfono:</strong> {{ proveedor.telefono }}</li>
+                <li class="list-group-item"><strong>Registrado:</strong> {{ proveedor.fecha_registro|date:"d/m/Y H:i"  }} </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Documentación</h3>
+            <a href="{% url 'admin_document_create' %}?proveedor={{ proveedor.pk }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-send-fill me-1"></i> Enviar Documento
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-light fw-bold">
+                <i class="bi bi-file-earmark-text"></i> Archivos Cargados
+            </div>
+            <div class="card-body">
+                {% if documentos_proveedor %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Vencimiento</th>
+                                <th>Cargado</th>
+                                <th>Archivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documentos_proveedor %}
+                            <tr>
+                                <td><span class="badge bg-primary">{{ doc.tipo_documento }}</span></td>
+                                <td>
+                                    {% if doc.fecha_vencimiento %}
+                                    {{ doc.fecha_vencimiento|date:"d/m/Y"  }} {% else %}
+                                    <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ doc.fecha_carga|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{{ doc.archivo.url }}" download class="btn btn-sm btn-outline-dark">
+                                        <i class="bi bi-download"></i> Descargar PDF
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning text-center">
+                    <i class="bi bi-exclamation-triangle"></i> No hay documentos cargados para este proveedor.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

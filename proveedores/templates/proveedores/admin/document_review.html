@@ -1,0 +1,298 @@
+{% extends 'layouts/base_admin.html' %}
+{% block title %}Revisar Documento{% endblock %}
+{% block page_title %}Revisar Documento{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <!-- -- Left Column: Document Details -- -->
+    <div class="col-xl-6">
+        <div class="premium-card h-100">
+            <div class="card-p-header">
+                <h6 class="m-0"><i class="bi bi-info-circle-fill me-2 text-primary"></i> Detalles del Documento</h6>
+            </div>
+            <div class="card-p-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label class="detail-label">Cargado el</label>
+                        <div class="detail-value text-muted">
+                            <i class="bi bi-calendar3 me-1"></i> {{ object.fecha_carga|date:"d/m/Y"  }} <i class="bi bi-clock ms-2 me-1"></i> {{ object.fecha_carga|date:"H:i"  }} </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-light rounded-4 text-center border border-dashed">
+                        <p class="text-muted small mb-3">Revisa la integridad y veracidad del archivo adjunto antes de
+                            tomar una decisión.</p>
+                        <div class="d-grid gap-2">
+                            <button type="button" onclick="openPdfViewer('{% url 'serve_document_pdf' object.pk %}')"
+                                class="btn-premium-blue px-4 py-2">
+                                <i class="bi bi-eye-fill me-2"></i> Visualizar Ahora
+                            </button>
+                            <a href="{{ object.archivo.url }}" download
+                                class="btn btn-outline-primary px-4 py-2 rounded-3 fw-bold">
+                                <i class="bi bi-download me-2"></i> Descargar
+                            </a>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Proveedor</label>
+                        <div class="detail-value">
+                            <span class="fw-bold text-dark">{{ object.proveedor.nombre }}</span>
+                            <div class="text-muted small">NIT: {{ object.proveedor.nit }}</div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Tipo de Documento</label>
+                        <div class="detail-value">
+                            <span class="doc-badge">{{ object.tipo_documento.nombre }}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Vigencia</label>
+                        <div class="detail-value">
+                            {% if object.fecha_vencimiento %}
+                            <div class="mb-2">
+                                <span class="fw-semibold">{{ object.fecha_vencimiento|date:"d/m/Y" }}</span>
+                            </div>
+                            {% if object.esta_vencido %}
+                            <span class="status-chip rejected">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Documento Vencido
+                            </span>
+                            {% else %}
+                            <span class="status-chip approved">
+                                <i class="bi bi-shield-check"></i> Vigente
+                            </span>
+                            {% endif %}
+                            {% else %}
+                            <span class="status-chip pending">Perpetuo / No Aplica</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- -- Right Column: Validation Form -- -->
+    <div class="col-xl-6">
+        <div class="premium-card h-100">
+            <div class="card-p-header">
+                <h6 class="m-0"><i class="bi bi-check2-square me-2 text-primary"></i> Evaluación y Validación</h6>
+            </div>
+            <div class="card-p-body">
+                <form method="post" class="review-form">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label-premium">Estado de la Revisión</label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="estado" id="estado_pendiente"
+                                    value="pendiente" {% if object.estado == "pendiente" %}checked{% endif %}>
+                                <label class="btn btn-outline-warning w-100 py-2 rounded-3" for="estado_pendiente">
+                                    <i class="bi bi-clock d-block mb-1 fs-5"></i> Pendiente
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="estado" id="estado_aprobado"
+                                    value="aprobado" {% if object.estado == "aprobado" %}checked{% endif %}>
+                                <label class="btn btn-outline-success w-100 py-2 rounded-3" for="estado_aprobado">
+                                    <i class="bi bi-check-circle d-block mb-1 fs-5"></i> Aprobar
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="radio" class="btn-check" name="estado" id="estado_rechazado"
+                                    value="rechazado" {% if object.estado == "rechazado" %}checked{% endif %}>
+                                <label class="btn btn-outline-danger w-100 py-2 rounded-3" for="estado_rechazado">
+                                    <i class="bi bi-x-circle d-block mb-1 fs-5"></i> Rechazar
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label-premium">Comentarios / Observaciones</label>
+                        <textarea name="comentario" class="premium-textarea" rows="4"
+                            placeholder="Ingrese detalles técnicos, motivos de rechazo o instrucciones para el proveedor...">{{ object.comentario|default:"" }}</textarea>
+                        <div class="form-text mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Estos comentarios serán visibles para el proveedor en su panel privado.
+                        </div>
+                    </div>
+                    <div class="action-footer mt-auto pt-4 d-flex gap-2">
+                        <a href="{% url 'admin_document_list' %}"
+                            class="btn btn-light px-4 py-2 border rounded-3 fw-bold text-muted">
+                            Volver al Listado
+                        </a>
+                        <button type="submit" class="btn-premium-blue flex-grow-1 py-2">
+                            <i class="bi bi-save2-fill me-2"></i> Guardar Evaluación Final
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* -- Layout & Grid -- */
+    .premium-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-p-header {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-p-body {
+        padding: 16px 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .detail-item {
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 4px;
+    }
+
+    .detail-value {
+        font-size: 0.9rem;
+        color: #1e293b;
+    }
+
+    /* -- UI Components -- */
+    .doc-badge {
+        background: #eff6ff;
+        color: #1e40af;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        border: 1px solid #dbeafe;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .status-chip.approved {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status-chip.rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-chip.pending {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    /* -- Form Styling -- */
+    .form-label-premium {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .premium-textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+        font-size: 0.9rem;
+        color: #1e293b;
+        transition: all 0.2s;
+        resize: none;
+    }
+
+    .premium-textarea:focus {
+        background: #fff;
+        border-color: #2563eb;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Buttons */
+    .btn-premium-blue {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-premium-blue:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        color: #fff;
+    }
+
+    /* Radio buttons as cards */
+    .btn-check:checked+.btn-outline-success {
+        background-color: #dcfce7;
+        border-color: #22c55e;
+        color: #15803d;
+    }
+
+    .btn-check:checked+.btn-outline-danger {
+        background-color: #fee2e2;
+        border-color: #ef4444;
+        color: #b91c1c;
+    }
+
+    .btn-check:checked+.btn-outline-warning {
+        background-color: #fef3c7;
+        border-color: #f59e0b;
+        color: #b45309;
+    }
+
+    .rounded-4 {
+        border-radius: 12px !important;
+    }
+
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+    }
+</style>
+{% endblock %}

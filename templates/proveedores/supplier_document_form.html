@@ -1,0 +1,309 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="form-wrapper">
+    <!-- ── Page Header ── -->
+    <div class="dash-header mb-4">
+        <div class="dash-header-left">
+            <div class="dash-icon">
+                <i class="bi bi-cloud-upload-fill"></i>
+            </div>
+            <div>
+                <h1 class="dash-title">Cargar Nuevo Documento</h1>
+                <p class="dash-subtitle">Suba sus archivos PDF para revisión</p>
+            </div>
+        </div>
+        <a href="{% url 'proveedor_dashboard' %}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Regresar al Panel
+        </a>
+    </div>
+
+    <!-- ── Upload Card ── -->
+    <div class="upload-card">
+        <div class="card-inner">
+            <form method="post" enctype="multipart/form-data" class="premium-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert-error mb-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>{{ form.non_field_errors }}</div>
+                </div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <!-- Tipo de Documento -->
+                    <div class="form-group full">
+                        <label class="form-label-premium">
+                            <i class="bi bi-file-earmark-text"></i> Tipo de Documento
+                        </label>
+                        {{ form.tipo_documento }}
+                        {% if form.tipo_documento.errors %}
+                        <div class="field-error">{{ form.tipo_documento.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Archivo -->
+                    <div class="form-group full">
+                        <label class="form-label-premium">
+                            <i class="bi bi-file-earmark-pdf"></i> Seleccionar Archivo (PDF)
+                        </label>
+                        <div class="file-input-wrapper">
+                            {{ form.archivo }}
+                            <div class="file-help">Solo se permiten archivos en formato PDF</div>
+                        </div>
+                        {% if form.archivo.errors %}
+                        <div class="field-error">{{ form.archivo.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Fecha de Vencimiento -->
+                    <div class="form-group full">
+                        <label class="form-label-premium">
+                            <i class="bi bi-calendar-event"></i> Fecha de Vencimiento <span
+                                class="text-muted small">(Opcional)</span>
+                        </label>
+                        {{ form.fecha_vencimiento }}
+                        <div class="file-help">Si el documento tiene vigencia, indíquela aquí</div>
+                        {% if form.fecha_vencimiento.errors %}
+                        <div class="field-error">{{ form.fecha_vencimiento.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit-premium">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Subir Documento
+                    </button>
+                    <a href="{% url 'proveedor_dashboard' %}" class="btn-cancel-premium">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Layout ── */
+    .form-wrapper {
+        padding: 24px 0 40px;
+        max-width: 600px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── Header Styles (Aligned with Dashboard) ── */
+    .dash-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .dash-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .dash-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #1a56db, #1e40af);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3);
+        flex-shrink: 0;
+    }
+
+    .dash-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .dash-subtitle {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        color: #64748b !important;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        border-radius: 8px;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-back:hover {
+        background: #f1f5f9;
+        color: #1a56db !important;
+    }
+
+    /* ── Upload Card ── */
+    .upload-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        overflow: hidden;
+    }
+
+    .card-inner {
+        padding: 30px;
+    }
+
+    /* ── Form Elements ── */
+    .premium-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-label-premium {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-label-premium i {
+        color: #1a56db;
+        font-size: 0.95rem;
+    }
+
+    /* Input Styling */
+    .premium-form select,
+    .premium-form input[type="file"],
+    .premium-form input[type="date"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 9px;
+        font-size: 0.9rem;
+        color: #1e293b;
+        background: #f8fafc;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+    }
+
+    .premium-form select:focus,
+    .premium-form input:focus {
+        border-color: #1a56db;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+    }
+
+    .file-input-wrapper {
+        border: 2px dashed #e2e8f0;
+        padding: 15px;
+        border-radius: 10px;
+        background: #f8fafc;
+        text-align: center;
+    }
+
+    .file-help {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 6px;
+    }
+
+    .field-error {
+        font-size: 0.8rem;
+        color: #dc2626;
+        margin-top: 4px;
+    }
+
+    .alert-error {
+        display: flex;
+        align-items: start;
+        gap: 10px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 12px;
+        color: #b91c1c;
+        font-size: 0.85rem;
+    }
+
+    /* ── Buttons ── */
+    .form-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .btn-submit-premium {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #1a56db, #1e40af);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3);
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-submit-premium:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(26, 86, 219, 0.4);
+    }
+
+    .btn-cancel-premium {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .btn-cancel-premium:hover {
+        color: #1e293b;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+        .form-wrapper {
+            padding: 20px 16px;
+        }
+
+        .dash-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .btn-back {
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}

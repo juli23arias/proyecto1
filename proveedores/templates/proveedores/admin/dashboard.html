@@ -1,0 +1,317 @@
+{% extends 'layouts/base_admin.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Resumen del Sistema{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Total Usuarios -->
+    <div class="col-md-3">
+        <div class="premium-stat-card card-users">
+            <div class="stat-body">
+                <div class="stat-info">
+                    <span class="stat-label">Usuarios</span>
+                    <h2 class="stat-value">{{ total_users }}</h2>
+                </div>
+                <div class="stat-icon-wrapper">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Proveedores -->
+    <div class="col-md-3">
+        <div class="premium-stat-card card-suppliers">
+            <div class="stat-body">
+                <div class="stat-info">
+                    <span class="stat-label">Proveedores</span>
+                    <h2 class="stat-value">{{ total_proveedores }}</h2>
+                </div>
+                <div class="stat-icon-wrapper">
+                    <i class="bi bi-truck"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Documentos -->
+    <div class="col-md-3">
+        <div class="premium-stat-card card-docs">
+            <div class="stat-body">
+                <div class="stat-info">
+                    <span class="stat-label">Documentos</span>
+                    <h2 class="stat-value">{{ total_documentos }}</h2>
+                </div>
+                <div class="stat-icon-wrapper">
+                    <i class="bi bi-files"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentos Pendientes -->
+    <div class="col-md-3">
+        <div class="premium-stat-card card-pending">
+            <div class="stat-body">
+                <div class="stat-info">
+                    <span class="stat-label">Pendientes</span>
+                    <h2 class="stat-value">{{ docs_pendientes }}</h2>
+                </div>
+                <div class="stat-icon-wrapper">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Actividad Reciente -->
+    <div class="col-md-8">
+        <div class="premium-card">
+            <div class="card-p-header">
+                <h6 class="m-0">Actividad Reciente</h6>
+                <a href="{% url 'admin_stats' %}" class="btn-p-sm">Ver estadísticas</a>
+            </div>
+            <div class="card-p-body">
+                <div class="empty-state-wrapper">
+                    <div class="empty-icon"><i class="bi bi-graph-up"></i></div>
+                    <h5>Gráfica de Actividad</h5>
+                    <p>Las métricas de rendimiento y actividad se mostrarán aquí próximamente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado Documentos -->
+    <div class="col-md-4">
+        <div class="premium-card">
+            <div class="card-p-header">
+                <h6 class="m-0">Estado de Documentos</h6>
+            </div>
+            <div class="card-p-body p-0">
+                <div class="status-list">
+                    <div class="status-item bg-approved">
+                        <div class="status-icon"><i class="bi bi-patch-check-fill"></i></div>
+                        <div class="status-label">Aprobados</div>
+                        <div class="status-count">{{ docs_aprobados }}</div>
+                    </div>
+                    <div class="status-item bg-rejected">
+                        <div class="status-icon"><i class="bi bi-x-circle-fill"></i></div>
+                        <div class="status-label">Rechazados</div>
+                        <div class="status-count">{{ docs_rechazados }}</div>
+                    </div>
+                    <div class="status-item bg-pending">
+                        <div class="status-icon"><i class="bi bi-clock-fill"></i></div>
+                        <div class="status-label">Revisiones Pendientes</div>
+                        <div class="status-count">{{ docs_pendientes }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Stat Cards ── */
+    .premium-stat-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+    }
+
+    .premium-stat-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .stat-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        margin: 4px 0 0;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Card Variants */
+    .card-users .stat-icon-wrapper {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .card-suppliers .stat-icon-wrapper {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .card-docs .stat-icon-wrapper {
+        background: #f0f9ff;
+        color: #0ea5e9;
+    }
+
+    .card-pending .stat-icon-wrapper {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    /* ── Premium Content Cards ── */
+    .premium-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .card-p-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-p-header h6 {
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .btn-p-sm {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #2563eb;
+        text-decoration: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        background: #eff6ff;
+        transition: all 0.2s;
+    }
+
+    .btn-p-sm:hover {
+        background: #dbeafe;
+    }
+
+    .card-p-body {
+        padding: 24px;
+    }
+
+    /* ── Empty State ── */
+    .empty-state-wrapper {
+        text-align: center;
+        padding: 60px 0;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: #e2e8f0;
+        margin-bottom: 16px;
+    }
+
+    .empty-state-wrapper h5 {
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    .empty-state-wrapper p {
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    /* ── Status List ── */
+    .status-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .status-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    .status-item:last-child {
+        border-bottom: none;
+    }
+
+    .status-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        margin-right: 16px;
+    }
+
+    .status-label {
+        flex-grow: 1;
+        font-weight: 600;
+        color: #475569;
+        font-size: 0.9rem;
+    }
+
+    .status-count {
+        font-weight: 800;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+
+    .bg-approved .status-icon {
+        color: #22c55e;
+    }
+
+    .bg-approved .status-count {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .bg-rejected .status-icon {
+        color: #ef4444;
+    }
+
+    .bg-rejected .status-count {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .bg-pending .status-icon {
+        color: #f59e0b;
+    }
+
+    .bg-pending .status-count {
+        background: #fffbeb;
+        color: #92400e;
+    }
+</style>
+{% endblock %}
